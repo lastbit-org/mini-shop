@@ -73,6 +73,32 @@ jobs:
             --project="${BUILD_PROJECT}" \
             --impersonate-service-account="${DEPLOYER_SA}"
 
+      - name: 'N5 — build simples no pool público'
+        env:
+          DEPLOYER_SA: ${{ vars.WIF_DEPLOYER_SERVICE_ACCOUNT }}
+          BUILD_PROJECT: ${{ vars.GCP_BUILD_PROJECT_ID }}
+          BUILD_SA: ${{ vars.GCP_BUILD_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          : "${DEPLOYER_SA:?variable da SA de deploy ausente}"
+          : "${BUILD_PROJECT:?variable do projeto de build ausente}"
+          : "${BUILD_SA:?variable da SA do Cloud Build ausente}"
+
+          cat > /tmp/smoke.yaml <<'YAML'
+          steps:
+            - name: 'gcr.io/cloud-builders/gcloud'
+              entrypoint: 'bash'
+              args: ['-c', 'echo "ok"']
+          options:
+            logging: NONE
+          YAML
+
+          gcloud builds submit --no-source \
+            --project="${BUILD_PROJECT}" \
+            --region='us-east1' \
+            --config=/tmp/smoke.yaml \
+            --service-account="projects/${BUILD_PROJECT}/serviceAccounts/${BUILD_SA}" \
+            --impersonate-service-account="${DEPLOYER_SA}"
 
       # O "print" da entrega: relatório visível na UI do Actions.
       - name: 'Publicar prova de conexão'
