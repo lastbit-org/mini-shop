@@ -53,7 +53,7 @@ jobs:
       - name: 'Publicar prova de conexão'
         run: |
           {
-            echo '## Conexão GCP estabelecida'
+            echo '## Conexão GCP estabelecida!'
             echo
             echo "| Campo | Valor |"
             echo "|---|---|"
