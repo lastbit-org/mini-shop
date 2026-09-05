@@ -46,7 +46,7 @@ jobs:
       - name: 'N2 — chamada a API restrita pelo perímetro'
         run: |
           set -euo pipefail
-          gcloud projects describe ${{ vars.PROJECT_ID }} \
+          gcloud projects describe lastbit-prj-b-seed \
             --format='value(projectId,projectNumber,lifecycleState)' | tee /tmp/project.txt
 
       # O "print" da entrega: relatório visível na UI do Actions.
