@@ -6,9 +6,6 @@ on:
 
 env:
   PROJECT_ID:  lastbit-prj-b-seed
-  WIF_DEPLOYER_SERVICE_ACCOUNT: "sa-deployer@lastbit-prj-d-project-epsilon.iam.gserviceaccount.com"
-  GCP_BUILD_PROJECT_ID: "lastbit-prj-d-project-epsilon"
-  GCP_BUILD_SERVICE_ACCOUNT: "sa-cloudbuild@lastbit-prj-d-project-epsilon.iam.gserviceaccount.com"
 
 # Menor privilégio possível para o GITHUB_TOKEN.
 permissions:
