@@ -6,6 +6,9 @@ on:
 
 env:
   PROJECT_ID:  lastbit-prj-b-seed
+  WIF_DEPLOYER_SERVICE_ACCOUNT: "sa-deployer@lastbit-prj-d-project-epsilon.iam.gserviceaccount.com"
+  GCP_BUILD_PROJECT_ID: "lastbit-prj-d-project-epsilon"
+  GCP_BUILD_SERVICE_ACCOUNT: "sa-cloudbuild@lastbit-prj-d-project-epsilon.iam.gserviceaccount.com"
 
 # Menor privilégio possível para o GITHUB_TOKEN.
 permissions:
@@ -48,6 +51,31 @@ jobs:
           set -euo pipefail
           gcloud projects describe lastbit-prj-b-seed \
             --format='value(projectId,projectNumber,lifecycleState)' | tee /tmp/project.txt
+ # N3: prova o hop 2. A credencial ativa é sa-wif-github; ela impersona
+      # sa-deployer. Exercita o tokenCreator + a ingress policy B
+      # (iamcredentials sobre projects/308275811209).
+      - name: 'N3 — hop para sa-deployer'
+        env:
+          DEPLOYER_SA: ${{ vars.WIF_DEPLOYER_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          TOKEN="$(gcloud auth print-access-token --impersonate-service-account="${DEPLOYER_SA}")"
+          echo "::add-mask::${TOKEN}"
+          curl -sS "https://oauth2.googleapis.com/tokeninfo?access_token=${TOKEN}" \
+            | jq '{email, expires_in}' | tee /tmp/deployer.json
+
+      # N4: prova que a API do Cloud Build passa pela ingress policy B,
+      # sem submeter build nenhum.
+      - name: 'N4 — API do Cloud Build como sa-deployer'
+        env:
+          DEPLOYER_SA: ${{ vars.WIF_DEPLOYER_SERVICE_ACCOUNT }}
+          BUILD_PROJECT: ${{ vars.GCP_BUILD_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          gcloud builds list --limit=1 \
+            --project="${BUILD_PROJECT}" \
+            --impersonate-service-account="${DEPLOYER_SA}"
+
 
       # O "print" da entrega: relatório visível na UI do Actions.
       - name: 'Publicar prova de conexão'
