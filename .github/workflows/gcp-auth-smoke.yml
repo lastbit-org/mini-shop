@@ -4,6 +4,9 @@ on:
   push:
     branches: ['main'] # o binding IAM restringe a refs/heads/main
 
+env:
+  PROJECT_ID:  ${{ secrets.PROJECT_ID }}
+
 # Menor privilégio possível para o GITHUB_TOKEN.
 permissions:
   contents: 'read'
