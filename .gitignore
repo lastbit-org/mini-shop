@@ -1,0 +1,65 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging artifacts
+bin/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments (CRITICAL to ignore)
+.venv/
+venv/
+ENV/
+env/
+ENV2/
+ENV3/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Test, coverage, and linting reports
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Environments and secret variables
+.env
+.yaml
+instance/
+
+# IDE-specific configurations (Optional but helpful)
+.vscode/
+.idea/
+
+
+.cursor/
