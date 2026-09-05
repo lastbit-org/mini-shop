@@ -70,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           gcloud builds list --limit=1 \
-            --project="lastbit-prj-d-project-epsilon" \
+            --project="${BUILD_PROJECT}" \
             --impersonate-service-account="${DEPLOYER_SA}"
 
 
