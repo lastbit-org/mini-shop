@@ -1,0 +1,64 @@
+name: GCP Auth Smoke Test
+
+on:
+  push:
+    branches: ['main'] # o binding IAM restringe a refs/heads/main
+
+# Menor privilégio possível para o GITHUB_TOKEN.
+permissions:
+  contents: 'read'
+  id-token: 'write' # obrigatório: sem isso não há JWT OIDC
+
+jobs:
+  auth-smoke:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - uses: 'actions/checkout@v4'
+
+      # Hop 1: JWT do GitHub → token federado → token de sa-wif-github.
+      # É AQUI que a ingress rule do VPC-SC para iamcredentials é exercida.
+      - id: 'auth'
+        name: 'Autenticar no GCP (WIF, sem chave)'
+        uses: 'google-github-actions/auth@v3'
+        with:
+          project_id: ${{ vars.PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - uses: 'google-github-actions/setup-gcloud@v3'
+
+      # N1: prova a identidade sem depender de nenhuma role IAM.
+      # oauth2.googleapis.com não é serviço restrito do perímetro.
+      - name: 'N1 — identidade efetiva do token'
+        run: |
+          set -euo pipefail
+          TOKEN="$(gcloud auth print-access-token)"
+          echo "::add-mask::${TOKEN}"
+          curl -sS "https://oauth2.googleapis.com/tokeninfo?access_token=${TOKEN}" \
+            | jq '{email, scope, expires_in}' | tee /tmp/tokeninfo.json
+
+      # N2: prova que a ingress rule do VPC-SC libera uma API restrita.
+      # Depende de roles/browser (R6) concedida NO PROJETO.
+      - name: 'N2 — chamada a API restrita pelo perímetro'
+        run: |
+          set -euo pipefail
+          gcloud projects describe ${{ vars.PROJECT_ID }} \
+            --format='value(projectId,projectNumber,lifecycleState)' | tee /tmp/project.txt
+
+      # O "print" da entrega: relatório visível na UI do Actions.
+      - name: 'Publicar prova de conexão'
+        run: |
+          {
+            echo '## Conexão GCP estabelecida'
+            echo
+            echo "| Campo | Valor |"
+            echo "|---|---|"
+            echo "| Repositório | \`${GITHUB_REPOSITORY}\` |"
+            echo "| Ref | \`${GITHUB_REF}\` |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Identidade efetiva | \`$(jq -r .email /tmp/tokeninfo.json)\` |"
+            echo "| Expira em (s) | \`$(jq -r .expires_in /tmp/tokeninfo.json)\` |"
+            echo "| Projeto acessado | \`$(cut -f1 /tmp/project.txt)\` |"
+            echo "| Chave de SA utilizada | **nenhuma (OIDC/WIF)** |"
+          } >> "${GITHUB_STEP_SUMMARY}"
