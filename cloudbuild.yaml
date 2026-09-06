@@ -1,6 +1,10 @@
 steps:
   - name: gcr.io/cloud-builders/docker
-    args: ["build", "-t", "gcr.io/$PROJECT_ID/mini-shop", "."]
+    args:
+      - "build"
+      - "-t"
+      - "us-east1-docker.pkg.dev/$PROJECT_ID/docker-epsilon/mini-shop"
+      - "."
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
@@ -8,4 +12,4 @@ options:
     name: "projects/lastbit-prj-d-project-epsilon/locations/us-east1/workerPools/wp-934509345"
 
 images:
-  - gcr.io/$PROJECT_ID/mini-shop
+  - us-east1-docker.pkg.dev/$PROJECT_ID/docker-epsilon/mini-shop
