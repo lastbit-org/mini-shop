@@ -1,4 +1,13 @@
 steps:
+  - name: python:3.14-slim
+    id: pytest
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install --no-cache-dir -r requirements-dev.txt
+        pytest -q
   - name: gcr.io/cloud-builders/docker
     args:
       - "build"
