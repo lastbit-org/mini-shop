@@ -87,6 +87,7 @@ jobs:
           gcloud builds submit \
             --project="${BUILD_PROJECT}" \
             --region='us-east1' \
+            --default-buckets-behavior=regional-user-owned-bucket \
             --config=cloudbuild.yaml \
             --service-account="projects/${BUILD_PROJECT}/serviceAccounts/${BUILD_SA}" \
             --impersonate-service-account="${DEPLOYER_SA}"
